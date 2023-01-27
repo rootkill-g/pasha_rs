@@ -1,6 +1,12 @@
-use std::{borrow::Cow, path::{Path, PathBuf}};
 use rand::{self, Rng};
+use rocket::request::FromParam;
+use std::{
+    borrow::Cow,
+    path::{Path, PathBuf},
+};
 
+
+#[derive(UriDisplayPath)]
 pub struct PashaId<'a>(Cow<'a, str>);
 
 impl PashaId<'_> {
@@ -17,5 +23,17 @@ impl PashaId<'_> {
     pub fn file_path(&self) -> PathBuf {
         let root = concat!(env!("CARGO_MANIFEST_DIR"), "/", "uploads");
         Path::new(root).join(self.0.as_ref())
+    }
+}
+
+impl<'a> FromParam<'a> for PashaId<'a> {
+    type Error = &'a str;
+
+    fn from_param(param: &'a str) -> Result<Self, Self::Error> {
+        param
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric())
+            .then(|| PashaId(param.into()))
+            .ok_or(param)
     }
 }
