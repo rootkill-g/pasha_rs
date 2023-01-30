@@ -4,8 +4,7 @@ extern crate rocket;
 mod pasha_id;
 
 use pasha_id::PashaId;
-use rocket::{data::{Data, ToByteUnit}, http::uri::Absolute, tokio::fs::File};
-use std::io;
+use rocket::{data::{Data, ToByteUnit}, http::uri::Absolute, tokio::fs::{self, File}};
 
 const ID_LENGTH: usize = 3;
 const HOST: Absolute<'static> = uri!("http://localhost:8000");
@@ -35,7 +34,12 @@ async fn uploads(pasha: Data<'_>) -> std::io::Result<String> {
     Ok(uri!(HOST, retrieve(id)).to_string())
 }
 
+#[delete("/<id>")]
+async fn delete(id: PashaId<'_>) -> Option<()> {
+    fs::remove_file(id.file_path()).await.ok()
+}
+
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, retrieve, uploads])
+    rocket::build().mount("/", routes![index, retrieve, uploads, delete])
 }
