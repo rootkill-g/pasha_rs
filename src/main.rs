@@ -19,6 +19,9 @@ async fn index() -> &'static str {
 
         GET /<id>
             retreives the content for the paste with id `<id>`
+
+        DELETE /<id>
+            deletes the content for the paste with id `<id>`
 "
 }
 
